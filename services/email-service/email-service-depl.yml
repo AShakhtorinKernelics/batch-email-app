@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: email-service-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: email-service
+  template:
+    metadata:
+      labels:
+        app: email-service
+    spec:
+      containers:
+        - name: email-service
+          image: amatreshka/email-service
+          imagePullPolicy: Never
+          env:
+            - name: NATS_CLIENT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NATS_URL
+              value: 'http://nats-srv:4222'
+            - name: NATS_CLUSTER_ID
+              value: email-app
+            - name: MONGO_URI
+              value: 'mongodb://email-service-mongo-clusterip-srv:27017/email-service'
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: email-service-clusterip-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: email-service
+  ports:
+    - name: email-service
+      protocol: TCP
+      port: 80
+      targetPort: 80
