@@ -5,8 +5,8 @@ import mongoose from 'mongoose';
 import { natsWrapper } from "./nats-wrapper";
 
 import { healthRouter } from "./routes/health";
-import { createEmailRouter } from "./routes/create-email";
-import { getEmailRouter } from "./routes/get-email";
+import { createWSRouter } from "./routes/create-email";
+import { getWSConnectionRouter } from "./routes/get-ws-connection";
 import cookieSession from "cookie-session";
 
 const app = express();
@@ -18,8 +18,8 @@ app.use(json());
 })); */
 
 app.use(healthRouter);
-app.use(createEmailRouter);
-app.use(getEmailRouter);
+app.use(createWSRouter);
+app.use(getWSConnectionRouter);
 
 /* app.get('*', () => {
     throw new NotFoundError();
