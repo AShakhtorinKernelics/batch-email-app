@@ -1,11 +1,64 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { RouterLink, RouterView } from "vue-router";
+import axios from "axios";
+
+let connection = null;
+
+function checkHealth() {
+  axios.defaults.headers.common["Accept"] = "application/json";
+
+  axios.get("http://localhost:4001/api/ws/health").then((response) => {
+    console.log("health");
+    console.log(response);
+  });
+}
+
+function clickCheck() {
+  console.log("click check");
+}
+
+function sendMessage(message = "hello") {
+  console.log(connection);
+  connection.send(message);
+}
+
+function created() {
+  console.log("Starting connection to WebSocket Server");
+  connection = new WebSocket("ws://localhost:4001/ws/");
+  console.log("connection");
+  console.log(connection);
+  connection.onmessage = function (event) {
+    console.log("on message");
+    console.log(event);
+  };
+  
+connection.onerror = function (error) {
+    console.log("on error");
+    console.log(error);
+  };
+
+  connection.onopen = function (event) {
+    console.log("on open");
+    console.log(event);
+    console.log("Successfully connected to the echo websocket server...");
+  };
+
+  connection.onclose = function (event) {
+    console.log("on close");
+    console.log(event);
+  };
+}
 </script>
 
 <template>
   <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+    <img
+      alt="Vue logo"
+      class="logo"
+      src="@/assets/logo.svg"
+      width="125"
+      height="125"
+    />
 
     <div class="wrapper">
       <HelloWorld msg="You did it!" />
@@ -13,6 +66,10 @@ import HelloWorld from './components/HelloWorld.vue'
       <nav>
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
+        <button type="button" @click="clickCheck">Google Email Check</button>
+        <button type="button" @click="created">WS Connection Create</button>
+        <button type="button" @click="sendMessage">WS Connection Send</button>
+        <button type="button" @click="checkHealth">Server health</button>
       </nav>
     </div>
   </header>
