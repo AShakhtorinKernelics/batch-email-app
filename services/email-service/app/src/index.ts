@@ -3,10 +3,12 @@ import 'express-async-errors';
 import { json } from 'body-parser';
 import mongoose from 'mongoose';
 import { natsWrapper } from "./nats-wrapper";
+import { errorHandler, NotFoundError } from './common/src';
 import { healthRouter } from "./routes/health";
 import { createEmailRouter } from "./routes/create-email";
 import { getEmailRouter } from "./routes/get-email";
 import { testRouter } from "./routes/test-router";
+const cors = require("cors");
 import * as dotenv from 'dotenv';
 import path from 'path';
 
@@ -20,6 +22,7 @@ dotenv.config({
 const app = express();
 app.set('trust proxy', true);
 app.use(json());
+app.use(cors());
 /* app.use(cookieSession({
     signed: false,
     secure: true
@@ -30,11 +33,11 @@ app.use(json());
 // app.use(getEmailRouter);
 app.use(testRouter);
 
-/* app.get('*', () => {
+app.get('*', () => {
     throw new NotFoundError();
 })
 
-app.use(errorHandler); */
+app.use(errorHandler);
 
 const start = async () => {
 

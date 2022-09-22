@@ -7,6 +7,8 @@ import { natsWrapper } from "./nats-wrapper";
 import { healthRouter } from "./routes/health";
 import { getWSConnectionByIdRouter } from "./routes/get-ws-connection-by-id";
 import { getWSConnectionListRouter } from "./routes/get-ws-connection-list";
+import { EmailSentListener } from './events/listeners/email-sent-listener';
+import { HealthCheckListener } from './events/listeners/health-check-listener';
 const cors = require("cors");
 // import cookieSession from "cookie-session";
 const app = express();
@@ -33,23 +35,23 @@ app.get('*', () => {
 app.use(errorHandler);
 
 const start = async () => {
-
-    /* if ( !process.env.JWT_KEY ) {
-        throw new Error('No JWT_KEY key found');
-    }
-    if ( !process.env.MONGO_URI ) {
+    /* 
+        if ( !process.env.JWT_KEY ) {
+            throw new Error('No JWT_KEY key found');
+        } */
+    /* if ( !process.env.MONGO_URI ) {
         throw new Error('No MONGO_URI key found');
-    }
-    if ( !process.env.NATS_CLUSTER_ID ) {
-        throw new Error('No NATS_CLUSTER_ID key found');
-    }
-    if ( !process.env.NATS_CLIENT_ID ) {
-        throw new Error('No NATS_CLIENT_ID key found');
-    }
-    if ( !process.env.NATS_URL ) {
-        throw new Error('No NATS_URL key found');
-    }
- */
+    } */
+    /*  if ( !process.env.NATS_CLUSTER_ID ) {
+         throw new Error('No NATS_CLUSTER_ID key found');
+     }
+     if ( !process.env.NATS_CLIENT_ID ) {
+         throw new Error('No NATS_CLIENT_ID key found');
+     }
+     if ( !process.env.NATS_URL ) {
+         throw new Error('No NATS_URL key found');
+     }
+  */
     try {
         /* await natsWrapper.connect(
             process.env.NATS_CLUSTER_ID,
@@ -64,6 +66,9 @@ const start = async () => {
         
                 process.on('SIGINT', () => natsWrapper.client.close()); // interrupt signal may not work on windows
                 process.on('SIGTERM', () => natsWrapper.client.close()); // terminate signal may not work on windows
+
+                    new EmailSentListener(natsWrapper.client).listen();
+                    new HealthCheckListener(natsWrapper.client).listen();
          */
         /* await mongoose.connect(process.env.MONGO_URI, {
             useNewUrlParser: true,

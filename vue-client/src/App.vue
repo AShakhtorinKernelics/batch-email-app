@@ -17,9 +17,13 @@ function clickCheck() {
   console.log("click check");
 }
 
-function sendMessage(message = "hello") {
-  console.log(connection);
-  connection.send(message);
+function sendMessage(message, action) {
+  connection.send(
+    JSON.stringify({
+      action: action,
+      data: message,
+    })
+  );
 }
 
 function created() {
@@ -31,8 +35,8 @@ function created() {
     console.log("on message");
     console.log(event);
   };
-  
-connection.onerror = function (error) {
+
+  connection.onerror = function (error) {
     console.log("on error");
     console.log(error);
   };
@@ -48,6 +52,16 @@ connection.onerror = function (error) {
     console.log(event);
   };
 }
+
+function getAllConnections() {
+  axios.defaults.headers.common["Accept"] = "application/json";
+
+  axios.get("http://localhost:4001/api/ws/list").then((response) => {
+    console.log(response);
+  });
+}
+
+function getConnectionBySessionId() {}
 </script>
 
 <template>
@@ -68,8 +82,16 @@ connection.onerror = function (error) {
         <RouterLink to="/about">About</RouterLink>
         <button type="button" @click="clickCheck">Google Email Check</button>
         <button type="button" @click="created">WS Connection Create</button>
-        <button type="button" @click="sendMessage">WS Connection Send</button>
+        <button type="button" @click="sendMessage('letter', 'echo')">
+          WS Connection Send
+        </button>
         <button type="button" @click="checkHealth">Server health</button>
+        <button type="button" @click="getAllConnections">
+          Get All Connections
+        </button>
+        <button type="button" @click="getConnectionBySessionId">
+          Get Connection By ID
+        </button>
       </nav>
     </div>
   </header>
