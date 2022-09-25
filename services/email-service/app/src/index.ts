@@ -4,11 +4,18 @@ import { json } from 'body-parser';
 import mongoose from 'mongoose';
 import { natsWrapper } from "./nats-wrapper";
 import { errorHandler, NotFoundError } from './common/src';
+import { GoogleAuthSetup } from './utils/google-passport-auth';
+
+// routes
 import { healthRouter } from "./routes/health";
 import { createEmailRouter } from "./routes/create-email";
 import { getEmailRouter } from "./routes/get-email";
 import { testRouter } from "./routes/test-router";
-const cors = require("cors");
+
+import passport from 'passport';
+const session = require('express-session');
+import cors from "cors";
+import { createProxyMiddleware, Filter, Options, RequestHandler } from 'http-proxy-middleware';
 import * as dotenv from 'dotenv';
 import path from 'path';
 
@@ -18,20 +25,37 @@ dotenv.config({
 });
 
 // import cookieSession from "cookie-session";
-
+// const proxyMiddleware = createProxyMiddleware({ target: 'http://www.example.org', changeOrigin: true });
 const app = express();
 app.set('trust proxy', true);
 app.use(json());
-app.use(cors());
-/* app.use(cookieSession({
-    signed: false,
-    secure: true
-})); */
+app.use(cors({
+    origin: process.env.CLIENT_ORIGIN
+}));
+app.use(session({
+    secret: process.env.SECRET,
+    resave: true,
+    saveUninitialized: true,
+}));
+app.use(passport.initialize());
+passport.serializeUser((user: any, cb) => cb(null, user));
+passport.deserializeUser((obj: any, cb) => cb(null, obj));
+passport.use(GoogleAuthSetup());
 
 // app.use(healthRouter);
 // app.use(createEmailRouter);
 // app.use(getEmailRouter);
-app.use(testRouter);
+// app.use(testRouter);
+
+app.get('/auth/google', passport.authenticate('google'));
+
+app.get('/oauth2/redirect/google',
+    passport.authenticate('google', {
+        successReturnToOrRedirect: process.env.CLIENT_ORIGIN,
+        failureRedirect: '/login',
+        failureMessage: true
+    }));
+
 
 app.get('*', () => {
     throw new NotFoundError();

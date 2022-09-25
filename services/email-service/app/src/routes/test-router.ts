@@ -1,36 +1,47 @@
 import express, { Response, Request } from "express";
 import { generateConfig, getOauthData } from "./../utils/utils";
-import { auth, mailoptions } from "../constants/constants";
-const nodemailer = require("nodemailer");
+// import { auth, mailoptions } from "../constants/constants";
+import nodemailer from "nodemailer";
 const axios = require("axios");
 
 const router = express.Router();
 
+
+const mailBuilder = () => {
+    return {
+        from: "ashakhtorin@gmail.com",
+        to: "ashakhtorin@gmail.com",
+        subject: "Gmail API NodeJS",
+        text: "mail via node"
+    }
+
+};
+
 async function sendMail(req: Request, res: Response) {
-    try {
-        const accessToken = await getOauthData().getAccessToken();
+    /* try {
+        // const accessToken = await getOauthData().getAccessToken();
         const transport = nodemailer.createTransport({
             service: "gmail",
             auth: {
-                ...auth,
+                type: 'OAuth2',
+                user: '',
+                clientId: process.env.CLIENT_ID,
+                clientSecret: process.env.CLIENT_SECRET,
                 accessToken: accessToken,
             },
         });
 
-        const mailOptions = {
-            ...mailoptions,
-            text: "The Gmail API with NodeJS works",
-        };
-
-        const result = await transport.sendMail(mailOptions);
+        const result = await transport.sendMail(
+            mailBuilder()
+        );
         res.send(result);
     } catch (error) {
         console.log(error);
         res.send(error);
-    }
+    } */
 }
 
-async function getUser(req: Request, res: Response) {
+/* async function getUser(req: Request, res: Response) {
     try {
 
         console.log('PORT');
@@ -73,10 +84,13 @@ async function readMail(req: Request, res: Response) {
         res.send(error);
     }
 }
-
-router.get('/mail/user/:email', getUser)
+ */
+/* router.get('/mail/user/:email', getUser)
 router.get('/mail/send', sendMail);
 router.get('/mail/drafts/:email', getDrafts);
 router.get('/mail/read/:messageId', readMail);
+ */
+
+
 
 export { router as testRouter };
