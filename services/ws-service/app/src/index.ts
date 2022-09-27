@@ -12,7 +12,8 @@ import { HealthCheckListener } from './events/listeners/health-check-listener';
 const cors = require("cors");
 // import cookieSession from "cookie-session";
 const app = express();
-const expressWs = require('express-ws')(app);
+import expressWs from 'express-ws'
+const wsApp = expressWs(app);
 import { createWSRouter } from "./routes/create-ws";
 
 app.set('trust proxy', true);
@@ -66,10 +67,9 @@ const start = async () => {
         
                 process.on('SIGINT', () => natsWrapper.client.close()); // interrupt signal may not work on windows
                 process.on('SIGTERM', () => natsWrapper.client.close()); // terminate signal may not work on windows
-
-                    new EmailSentListener(natsWrapper.client).listen();
-                    new HealthCheckListener(natsWrapper.client).listen();
          */
+        new EmailSentListener(natsWrapper.client, wsApp).listen();
+        new HealthCheckListener(natsWrapper.client).listen();
         /* await mongoose.connect(process.env.MONGO_URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,

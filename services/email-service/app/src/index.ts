@@ -4,7 +4,8 @@ import { json } from 'body-parser';
 import mongoose from 'mongoose';
 import { natsWrapper } from "./nats-wrapper";
 import { errorHandler, NotFoundError } from './common/src';
-import { GoogleAuthSetup } from './utils/google-passport-auth';
+import { GoogleAuthSetup, JWTAuthSetup } from './utils/google-passport-auth';
+import { generateJWT } from './utils/generate-jwt-token';
 
 // routes
 import { healthRouter } from "./routes/health";
@@ -13,9 +14,9 @@ import { getEmailRouter } from "./routes/get-email";
 import { testRouter } from "./routes/test-router";
 
 import passport from 'passport';
-const session = require('express-session');
+// const session = require('express-session');
 import cors from "cors";
-import { createProxyMiddleware, Filter, Options, RequestHandler } from 'http-proxy-middleware';
+// import { createProxyMiddleware, Filter, Options, RequestHandler } from 'http-proxy-middleware';
 import * as dotenv from 'dotenv';
 import path from 'path';
 
@@ -32,29 +33,50 @@ app.use(json());
 app.use(cors({
     origin: process.env.CLIENT_ORIGIN
 }));
-app.use(session({
+/* app.use(session({
     secret: process.env.SECRET,
     resave: true,
     saveUninitialized: true,
-}));
+})); */
 app.use(passport.initialize());
 passport.serializeUser((user: any, cb) => cb(null, user));
 passport.deserializeUser((obj: any, cb) => cb(null, obj));
 passport.use(GoogleAuthSetup());
+passport.use(JWTAuthSetup());
 
-// app.use(healthRouter);
+app.use(
+    (req, res, next) => {
+        // console.log('auth check');
+        // req.isAuthenticated();
+        // console.log(req.isAuthenticated());
+        // console.log(req.headers)
+        next();
+    },
+    healthRouter
+);
 // app.use(createEmailRouter);
 // app.use(getEmailRouter);
 // app.use(testRouter);
 
-app.get('/auth/google', passport.authenticate('google'));
+app.get('/auth/google',
+    passport.authenticate('google', {
+        session: false,
+        scope: ['email', 'profile']
+    })
+);
 
 app.get('/oauth2/redirect/google',
     passport.authenticate('google', {
-        successReturnToOrRedirect: process.env.CLIENT_ORIGIN,
+        session: false,
         failureRedirect: '/login',
         failureMessage: true
-    }));
+    }),
+    (req, res) => {
+        const token = generateJWT(req.user);
+        res.setHeader('Authorization', 'Bearer ' + token);
+        // res.redirect(process.env.CLIENT_ORIGIN + '/auth');
+        res.send('qwer asd');
+    });
 
 
 app.get('*', () => {

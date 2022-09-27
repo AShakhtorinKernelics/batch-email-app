@@ -5,17 +5,20 @@ interface ConnectionAttrs {
     id: string;
     userId: string;
     ip: string;
+    ws: any;
 }
 
 export interface ConnectionDoc extends mongoose.Document {
     id: string;
     userId: string;
     ip: string;
+    ws: any;
 }
 
 interface ConnectionModel extends mongoose.Model<ConnectionDoc> {
     build(attrs: ConnectionAttrs): ConnectionDoc;
     findBySessionId(sessionId: string): Promise<ConnectionDoc | null>;
+    findByUserId(userId: string): Promise<ConnectionDoc | null>;
 }
 
 const connectionSchema = new mongoose.Schema(
@@ -30,6 +33,9 @@ const connectionSchema = new mongoose.Schema(
         },
         ip: {
             type: String,
+            required: true,
+        },
+        ws: {
             required: true,
         },
     },
@@ -53,13 +59,25 @@ connectionSchema.statics.findBySessionId = (
         id: sessionId
     });
 };
+
+connectionSchema.statics.findByUserId = (
+    userId: string
+) => {
+    return Connection.findOne({
+        userId: userId
+    });
+};
+
 connectionSchema.statics.build = (attrs: ConnectionAttrs) => {
     return new Connection({
         _id: attrs.id,
         userId: attrs.userId,
         ip: attrs.ip,
+        ws: attrs.ws
     });
 };
+
+
 
 const Connection = mongoose.model<ConnectionDoc, ConnectionModel>('Connection', connectionSchema);
 

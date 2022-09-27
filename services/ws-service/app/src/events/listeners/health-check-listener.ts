@@ -6,7 +6,7 @@ export class HealthCheckListener extends Listener<HealthCheckEvent> {
     queueGroupName = 'qwe-service';
 
     onMessage(data: HealthCheckEvent['data'], msg: Message) {
-        console.log('Event data!', data);
+        console.log('Service is Alive!', data);
         msg.ack();
     }
 }

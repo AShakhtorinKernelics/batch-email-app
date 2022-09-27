@@ -61,6 +61,22 @@ function getAllConnections() {
   });
 }
 
+function googleAuthReq() {
+  console.log("googleAuthReq");
+  /* axios.get("http://localhost:4000/auth/google").then((response) => {
+    console.log(response);
+  }); */
+  window.open("http://localhost:4000/auth/google", "_self");
+}
+
+function emailSenderHealthCheck() {
+  axios.defaults.headers.common["Accept"] = "application/json";
+
+  axios.get("http://localhost:4000/api/email/health").then((response) => {
+    console.log(response);
+  });
+}
+
 function getConnectionBySessionId() {}
 </script>
 
@@ -91,6 +107,12 @@ function getConnectionBySessionId() {}
         </button>
         <button type="button" @click="getConnectionBySessionId">
           Get Connection By ID
+        </button>
+        <button type="button" @click="googleAuthReq">
+          Google Auth Request
+        </button>
+        <button type="button" @click="emailSenderHealthCheck">
+          Email Sender Health Check
         </button>
       </nav>
     </div>

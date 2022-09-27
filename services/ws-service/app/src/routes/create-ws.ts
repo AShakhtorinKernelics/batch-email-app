@@ -11,15 +11,12 @@ const router = express.Router();
 router.ws('/ws', function (ws: any, req: any) {
     const uuid = uuidv4();
     ws.sessionId = uuid;
-    // console.log(req);
-    // Handle new row in DB
     const connection = new Connection({
         id: uuid,
+        ws: ws,
         userId: 'userId',
         ip: 'ip'
     });
-
-    // TODO queue stream event -> connection succeded
 
     console.log('connection object before save');
     console.log(connection);
@@ -57,13 +54,11 @@ router.ws('/ws', function (ws: any, req: any) {
 
         if (connection) {
             connection.delete();
-            new ConnectionLostPublisher(natsWrapper.client).publish({
+            /* new ConnectionLostPublisher(natsWrapper.client).publish({
                 sessionId: uuid,
                 userId: connection.userId
-            });
+            }); */
         }
-
-        // TODO queue stream connection lost
     });
 });
 
