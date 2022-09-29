@@ -14,6 +14,12 @@
           </div>
           <div class="col-2">
             <button class="btn btn-success" @click="add">Add</button>
+            <button class="btn btn-success" @click="googleAuthReq">
+              Google Connection
+            </button>
+            <button class="btn btn-success" @click="sendEmail">
+              Send Email
+            </button>
           </div>
         </div>
         <div class="row">
@@ -26,8 +32,8 @@
     </div>
   </div>
 </template>
-
 <script>
+import axios from "axios";
 import List from "./components/List.vue";
 export default {
   data() {
@@ -110,6 +116,15 @@ export default {
     },
     googleAuthReq() {
       window.open("http://localhost:4000/auth/google", "_self");
+    },
+
+    sendEmail() {
+      axios.defaults.headers.common["Accept"] = "application/json";
+
+      axios.get("http://localhost:4000/mail/send").then((response) => {
+        console.log("health");
+        console.log(response);
+      });
     },
   },
 };

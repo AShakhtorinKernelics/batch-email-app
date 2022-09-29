@@ -1,4 +1,7 @@
 const { OAuth2Strategy } = require('passport-google-oauth');
+
+import nodemailer from "nodemailer";
+
 import JWTStrategy from 'passport-jwt';
 
 const tempUserDB = new Map();
@@ -13,7 +16,12 @@ export const GoogleAuthSetup = () => {
         console.log(profile);
         const displayName = profile.displayName;
         const userId = profile.id;
-        const userEmails = profile.emails; // [ {value: '', verified: true } ]
+        const userEmails: { value: string, verified: boolean }[] = profile.emails; // [ {value: '', verified: true } ]
+
+        const userMainEmail = userEmails.find(
+            (item: { value: string, verified: boolean }) => item.verified
+        );
+
         return cb(null, profile);
     }
 
@@ -21,7 +29,12 @@ export const GoogleAuthSetup = () => {
     const GoogleConfig = {
         clientID: process.env.CLIENT_ID,
         clientSecret: process.env.CLIENT_SECRET,
-        callbackURL: 'http://localhost:4000/oauth2/redirect/google'
+        callbackURL: 'http://localhost:4000/oauth2/redirect/google',
+        scope: [
+            'https://mail.google.com/',
+            'https://www.googleapis.com/auth/userinfo.profile',
+            'https://www.googleapis.com/auth/userinfo.email'
+        ]
     };
 
     return new OAuth2Strategy(GoogleConfig, callback);

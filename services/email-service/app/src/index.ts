@@ -9,14 +9,10 @@ import { generateJWT } from './utils/generate-jwt-token';
 
 // routes
 import { healthRouter } from "./routes/health";
-import { createEmailRouter } from "./routes/create-email";
-import { getEmailRouter } from "./routes/get-email";
-import { testRouter } from "./routes/test-router";
+import { mailRouter } from "./routes/mail-router";
 
 import passport from 'passport';
-// const session = require('express-session');
 import cors from "cors";
-// import { createProxyMiddleware, Filter, Options, RequestHandler } from 'http-proxy-middleware';
 import * as dotenv from 'dotenv';
 import path from 'path';
 
@@ -25,43 +21,26 @@ dotenv.config({
     path: path.join(__dirname, '.env')
 });
 
-// import cookieSession from "cookie-session";
-// const proxyMiddleware = createProxyMiddleware({ target: 'http://www.example.org', changeOrigin: true });
 const app = express();
 app.set('trust proxy', true);
 app.use(json());
 app.use(cors({
     origin: process.env.CLIENT_ORIGIN
 }));
-/* app.use(session({
-    secret: process.env.SECRET,
-    resave: true,
-    saveUninitialized: true,
-})); */
+
 app.use(passport.initialize());
 passport.serializeUser((user: any, cb) => cb(null, user));
 passport.deserializeUser((obj: any, cb) => cb(null, obj));
 passport.use(GoogleAuthSetup());
 passport.use(JWTAuthSetup());
 
-app.use(
-    (req, res, next) => {
-        // console.log('auth check');
-        // req.isAuthenticated();
-        // console.log(req.isAuthenticated());
-        // console.log(req.headers)
-        next();
-    },
-    healthRouter
-);
-// app.use(createEmailRouter);
-// app.use(getEmailRouter);
-// app.use(testRouter);
+app.use(healthRouter);
+app.use(mailRouter);
 
 app.get('/auth/google',
     passport.authenticate('google', {
         session: false,
-        scope: ['email', 'profile']
+        accessType: 'offline',
     })
 );
 
@@ -69,13 +48,14 @@ app.get('/oauth2/redirect/google',
     passport.authenticate('google', {
         session: false,
         failureRedirect: '/login',
-        failureMessage: true
+        failureMessage: true,
+        accessType: 'offline',
     }),
     (req, res) => {
         const token = generateJWT(req.user);
-        res.setHeader('Authorization', 'Bearer ' + token);
-        // res.redirect(process.env.CLIENT_ORIGIN + '/auth');
-        res.send('qwer asd');
+        // res.setHeader('Authorization', 'Bearer ' + token);
+        res.redirect(process.env.CLIENT_ORIGIN + '/auth');
+        // res.send('qwer asd');
     });
 
 
