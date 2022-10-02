@@ -1,10 +1,17 @@
 import express, { Response, Request } from "express";
 import nodemailer from "nodemailer";
 import { User } from "../models/User";
-import { getNodemailerConfig, mailBuilder, toDecrypted } from "../utils";
+import {
+    getNodemailerConfig,
+    mailBuilder,
+    toDecrypted,
+    passportJWTCheckOptions
+} from "../utils";
 import jwt from 'jsonwebtoken';
 
 const router = express.Router();
+
+router.use('/mail', passportJWTCheckOptions);
 
 router.post('/mail/send', async (req: Request, res: Response) => {
     try {

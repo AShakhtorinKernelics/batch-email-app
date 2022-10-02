@@ -6,10 +6,12 @@
 </template>
 
 <script lang="ts">
+import { AuthService } from "../services";
+
 export default {
   methods: {
     googleAuthReq() {
-      window.open("http://localhost:4000/auth/google", "_self");
+      AuthService.googleAuth();
     },
   },
 };

@@ -6,7 +6,7 @@ import { natsWrapper } from "./nats-wrapper";
 import { errorHandler, NotFoundError } from './common/src';
 import {
     generateJWT,
-    passportCheckOptions,
+    passportGoogleCheckOptions,
     GoogleAuthSetup,
     JWTAuthSetup
 } from './utils';
@@ -14,6 +14,7 @@ import {
 // routes
 import { healthRouter } from "./routes/health";
 import { mailRouter } from "./routes/mail-router";
+import { contactRouter } from "./routes/contact-router";
 
 import passport from 'passport';
 import cors from "cors";
@@ -40,20 +41,18 @@ passport.use(JWTAuthSetup());
 
 app.use(healthRouter);
 app.use(mailRouter);
+app.use(contactRouter);
 
 app.get('/auth/google',
-    passport.authenticate('google', passportCheckOptions())
+    passport.authenticate('google', passportGoogleCheckOptions())
 );
 
 app.get('/oauth2/redirect/google',
-    passport.authenticate('google', passportCheckOptions()),
+    passport.authenticate('google', passportGoogleCheckOptions()),
     (req, res) => {
         const token = generateJWT(req.user);
-        // res.send({ jwt: token })
-        // res.setHeader('Authorization', 'Bearer ' + token);
         res.cookie('jwt', token);
         res.redirect(process.env.CLIENT_ORIGIN + '/pending');
-        // res.send('qwer asd');
     });
 
 app.get('*', () => {
@@ -67,11 +66,11 @@ const start = async () => {
 
     /* if ( !process.env.JWT_KEY ) {
         throw new Error('No JWT_KEY key found');
-    }
-    if ( !process.env.MONGO_URI ) {
+    }*/
+    if (!process.env.MONGO_URI) {
         throw new Error('No MONGO_URI key found');
     }
-    if ( !process.env.NATS_CLUSTER_ID ) {
+    /*if ( !process.env.NATS_CLUSTER_ID ) {
         throw new Error('No NATS_CLUSTER_ID key found');
     }
     if ( !process.env.NATS_CLIENT_ID ) {
@@ -96,11 +95,12 @@ const start = async () => {
         process.on('SIGINT', () => natsWrapper.client.close()); // interrupt signal may not work on windows
         process.on('SIGTERM', () => natsWrapper.client.close()); // terminate signal may not work on windows
 
-        /* await mongoose.connect(process.env.MONGO_URI, {
+        await mongoose.connect(process.env.MONGO_URI!, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
             useCreateIndex: true
-        }); */
+        });
+
         console.log('Connected to MongoDB');
 
 

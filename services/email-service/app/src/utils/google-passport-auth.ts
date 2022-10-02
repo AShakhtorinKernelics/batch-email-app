@@ -14,7 +14,7 @@ export const GoogleAuthSetup = () => {
             (item: { value: string, verified: boolean }) => item.verified
         );
 
-        /* const existingUser = await User.findOne({ googleId: userId });
+        const existingUser = await User.findOne({ googleId: userId });
 
         if (!existingUser) {
             const userData = await User.build({
@@ -26,6 +26,9 @@ export const GoogleAuthSetup = () => {
                 userWsConnectionId: ''
             });
 
+            console.log('non existing user data');
+            console.log(userData);
+
             return cb(null, userData);
         }
         if (existingUser && refreshToken) {
@@ -33,10 +36,10 @@ export const GoogleAuthSetup = () => {
                 refreshToken: refreshToken
             });
             return cb(null, userData);
-        } */
+        }
 
         // return cb(null, existingUser);
-        return cb(null, profile);
+        // return cb(null, profile);
     }
 
     return new OAuth2Strategy(

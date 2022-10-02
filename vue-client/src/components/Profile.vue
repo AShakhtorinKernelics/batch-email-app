@@ -20,7 +20,7 @@
             <button class="btn btn-success" @click="logOut">Log out</button>
           </div>
         </div>
-        <div class="row">
+        <div class="row" v-if="emailLoading">
           <div class="col">
             <list :emails="emails" @deleteEmail="deleteEmail" />
             <small>Emails Selected : {{ emailsAmount }}</small>
@@ -38,21 +38,23 @@
 </template>
 
 <script>
-import axios from "axios";
 import List from "./List.vue";
 import { storageAuthItemName } from "../constants/auth-item-names";
 import { viewNames } from "../constants/view-names";
+import { ContactsService, MailService } from "../services";
 
 export default {
   data() {
     return {
       connection: null,
       email: "",
+      emailLoading: true,
       emails: [],
     };
   },
   mounted() {
-    this.emails = JSON.parse(localStorage.getItem("emails")) || [];
+    // this.emails = JSON.parse(localStorage.getItem("emails")) || [];
+    this.getEmails();
     this.wsConnectionOpen();
   },
   computed: {
@@ -63,13 +65,27 @@ export default {
   components: { List },
 
   methods: {
+    getEmails() {
+      MailService.getEmails().then(
+        (res) => {
+          console.log(res);
+          this.emailLoading = false;
+          this.emails = res;
+        },
+        (err) => {
+          console.log(err);
+          this.emailLoading = false;
+          this.emails = [];
+        }
+      );
+    },
     add() {
       this.emails.unshift({
         name: this.email,
         isDone: false,
       });
       this.email = "";
-      this.saveToLocalStorage();
+      this.saveUpdates();
     },
     deleteEmail(emailIndex) {
       this.emails = this.emails.filter((item, index) => {
@@ -77,10 +93,13 @@ export default {
           return item;
         }
       });
-      this.saveToLocalStorage();
+      this.saveUpdates();
     },
-    saveToLocalStorage() {
-      localStorage.setItem("emails", JSON.stringify(this.emails));
+    saveUpdates() {
+      ContactsService.setContactList(this.emails).then((res) => {
+        console.log(res);
+        localStorage.setItem("emails", JSON.stringify(this.emails));
+      });
     },
     wsConnectionOpen() {
       console.log("Starting connection to WebSocket Server");
@@ -123,9 +142,7 @@ export default {
       );
     },
     sendEmail() {
-      axios.defaults.headers.common["Accept"] = "application/json";
-
-      axios.get("http://localhost:4000/mail/send").then((response) => {
+      MailService.sendEmail("", "", "", "").then((response) => {
         console.log("health");
         console.log(response);
       });

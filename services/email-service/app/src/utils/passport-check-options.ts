@@ -1,8 +1,16 @@
-export const passportCheckOptions = () => {
+export const passportGoogleCheckOptions = () => {
     return {
         session: false,
-        failureRedirect: '/login',
+        failureRedirect: '/',
         failureMessage: true,
         accessType: 'offline',
+    };
+}
+
+export const passportJWTCheckOptions = () => {
+    return {
+        session: false,
+        failureRedirect: '/',
+        failureMessage: true,
     };
 }

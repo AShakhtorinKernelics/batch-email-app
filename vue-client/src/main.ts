@@ -8,6 +8,6 @@ import './assets/main.css'
 const app = createApp(App)
 
 app.use(VueCookies);
-app.use(router)
+app.use(router);
 
 app.mount('#app')

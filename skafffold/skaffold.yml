@@ -1,0 +1,29 @@
+apiVersion: skaffold/v2alpha3
+kind: Config
+deploy:
+  kubectl:
+    manifests:
+      - ../k8s/*.yml
+      - ../services/email-service/*.yml
+      - ../services/ws-service/*.yml
+      - ../services/nats-service/*.yml
+build:
+  local:
+    push: false
+  artifacts:
+    - image: amatreshka/email-service
+      context: ../services/email-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'app/**/*.js'
+            dest: .
+    - image: amatreshka/ws-service
+      context: ../services/ws-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+           - src: 'app/**/*.js'
+             dest: .
