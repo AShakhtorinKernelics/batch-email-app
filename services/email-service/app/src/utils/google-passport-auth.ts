@@ -1,43 +1,47 @@
 const { OAuth2Strategy } = require('passport-google-oauth');
-
-import nodemailer from "nodemailer";
-
 import JWTStrategy from 'passport-jwt';
-
-const tempUserDB = new Map();
+import { User } from '../models/User';
+import { getGoogleStrategyConfig } from './';
 
 export const GoogleAuthSetup = () => {
-    const callback = (accessToken: string, refreshToken: string, profile: any, cb: any) => {
-        console.log('accessToken');
-        console.log(accessToken);
-        console.log('refresh token');
-        console.log(refreshToken);
-        console.log('profile');
-        console.log(profile);
+    const callback = async (accessToken: string, refreshToken: string, profile: any, cb: any) => {
+        // console.log('profile');
+        // console.log(profile);
         const displayName = profile.displayName;
         const userId = profile.id;
-        const userEmails: { value: string, verified: boolean }[] = profile.emails; // [ {value: '', verified: true } ]
-
+        const userEmails: { value: string, verified: boolean }[] = profile.emails;
         const userMainEmail = userEmails.find(
             (item: { value: string, verified: boolean }) => item.verified
         );
 
+        /* const existingUser = await User.findOne({ googleId: userId });
+
+        if (!existingUser) {
+            const userData = await User.build({
+                displayName: displayName,
+                googleId: userId,
+                refreshToken: refreshToken,
+                userEmail: userMainEmail?.value || '',
+                contacts: [],
+                userWsConnectionId: ''
+            });
+
+            return cb(null, userData);
+        }
+        if (existingUser && refreshToken) {
+            const userData = await existingUser.set({
+                refreshToken: refreshToken
+            });
+            return cb(null, userData);
+        } */
+
+        // return cb(null, existingUser);
         return cb(null, profile);
     }
 
-
-    const GoogleConfig = {
-        clientID: process.env.CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET,
-        callbackURL: 'http://localhost:4000/oauth2/redirect/google',
-        scope: [
-            'https://mail.google.com/',
-            'https://www.googleapis.com/auth/userinfo.profile',
-            'https://www.googleapis.com/auth/userinfo.email'
-        ]
-    };
-
-    return new OAuth2Strategy(GoogleConfig, callback);
+    return new OAuth2Strategy(
+        getGoogleStrategyConfig(), callback
+    );
 }
 
 export const JWTAuthSetup = () => {

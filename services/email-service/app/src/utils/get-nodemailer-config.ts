@@ -1,6 +1,6 @@
 import { TransportOptions } from "nodemailer";
 
-export const getOauthData = (userEmail: string, userRefreshToken: string): TransportOptions => {
+export const getNodemailerConfig = (userEmail: string, userRefreshToken: string): TransportOptions => {
     return {
         service: "Gmail",
         auth: {

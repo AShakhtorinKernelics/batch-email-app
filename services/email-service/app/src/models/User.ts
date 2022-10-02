@@ -1,84 +1,65 @@
 import mongoose from 'mongoose';
-import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
+import { toEncrypted } from '../utils';
 
-interface ConnectionAttrs {
-    id: string;
-    userId: string;
-    ip: string;
-    ws: any;
+interface UserAttrs {
+    displayName: string;
+    googleId: string;
+    refreshToken: string;
+    userEmail: string;
+    contacts: string[];
+    userWsConnectionId: any;
 }
 
-export interface ConnectionDoc extends mongoose.Document {
-    id: string;
-    userId: string;
-    ip: string;
-    ws: any;
+export interface UserDoc extends mongoose.Document {
+    displayName: string;
+    googleId: string;
+    refreshToken: string;
+    userEmail: string;
+    contacts: string[];
+    userWsConnectionId: any;
 }
 
-interface ConnectionModel extends mongoose.Model<ConnectionDoc> {
-    build(attrs: ConnectionAttrs): ConnectionDoc;
-    findBySessionId(sessionId: string): Promise<ConnectionDoc | null>;
-    findByUserId(userId: string): Promise<ConnectionDoc | null>;
+interface UserModel extends mongoose.Model<UserDoc> {
+    build(attrs: UserAttrs): UserDoc;
 }
 
-const connectionSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(
     {
-        id: {
+        displayName: {
             type: String,
             required: true,
         },
-        userId: {
+        googleId: {
             type: String,
             required: true,
         },
-        ip: {
+        refreshToken: {
             type: String,
             required: true,
         },
-        ws: {
+        userEmail: {
+            type: String,
             required: true,
         },
-    },
-    {
-        toJSON: {
-            transform(doc, ret) {
-                ret.id = ret._id;
-                delete ret._id;
-            },
+        contacts: {
+            type: Array,
+            required: true,
+        },
+        userWsConnectionId: {
+            type: String,
+            required: true,
         },
     }
 );
 
-connectionSchema.set('versionKey', 'version');
-connectionSchema.plugin(updateIfCurrentPlugin);
-
-connectionSchema.statics.findBySessionId = (
-    sessionId: string
-) => {
-    return Connection.findOne({
-        id: sessionId
+userSchema.statics.build = (attrs: UserAttrs) => {
+    const tempAttrs = { ...attrs };
+    tempAttrs.refreshToken = toEncrypted(tempAttrs.refreshToken, tempAttrs.userEmail);
+    return new User({
+        ...tempAttrs
     });
 };
 
-connectionSchema.statics.findByUserId = (
-    userId: string
-) => {
-    return Connection.findOne({
-        userId: userId
-    });
-};
+const User = mongoose.model<UserDoc, UserModel>('User', userSchema);
 
-connectionSchema.statics.build = (attrs: ConnectionAttrs) => {
-    return new Connection({
-        _id: attrs.id,
-        userId: attrs.userId,
-        ip: attrs.ip,
-        ws: attrs.ws
-    });
-};
-
-
-
-const Connection = mongoose.model<ConnectionDoc, ConnectionModel>('Connection', connectionSchema);
-
-export { Connection };
+export { User };

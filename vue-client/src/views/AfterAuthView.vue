@@ -1,9 +1,9 @@
 <template>
   <main>
-    <Login />
+    <AfterAuth />
   </main>
 </template>
 
 <script lang="ts">
-import Login from "../components/Login.vue";
+import AfterAuth from "../components/AfterAuth.vue";
 </script>

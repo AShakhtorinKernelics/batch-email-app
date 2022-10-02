@@ -1,28 +1,47 @@
 import express, { Response, Request } from "express";
-import nodemailer from "nodemailer";
-import { getOauthData, mailBuilder } from "../utils";
+import { User } from "../models/User";
 
 const router = express.Router();
 
-router.get('/mail/send', (req: Request, res: Response) => {
+router.get('/contacts/:id', async (req: Request, res: Response) => {
     try {
-        const userEmail = ;
-        const userRefreshToken = ;
-        const transport = nodemailer.createTransport(
-            getOauthData(
-                userEmail,
-                userRefreshToken
-            )
-        );
+        const userId = req.params.id;
+        const userData = await User.findById(userId);
 
-        const result = await transport.sendMail(
-            mailBuilder('', '', '', '')
+        if (!userData) {
+            throw new Error('User not found');
+        }
+
+        res.send(
+            userData?.contacts || []
         );
-        res.send(result);
     } catch (error) {
         console.log(error);
         res.send(error);
     }
 });
 
-export { router as mailRouter };
+router.post('/contacts/:id', async (req: Request, res: Response) => {
+    try {
+        const userId = req.params.id;
+        const { contacts } = req.body;
+        const userData = await User.findById(userId);
+
+        if (!userData) {
+            throw new Error('User not found');
+        }
+
+        userData.set({
+            contacts: contacts
+        });
+
+        await userData.save();
+
+        res.send(userData);
+    } catch (error) {
+        console.log(error);
+        res.send(error);
+    }
+});
+
+export { router as contactRouter };

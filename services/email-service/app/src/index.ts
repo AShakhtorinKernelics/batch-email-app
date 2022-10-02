@@ -4,8 +4,12 @@ import { json } from 'body-parser';
 import mongoose from 'mongoose';
 import { natsWrapper } from "./nats-wrapper";
 import { errorHandler, NotFoundError } from './common/src';
-import { GoogleAuthSetup, JWTAuthSetup } from './utils/google-passport-auth';
-import { generateJWT } from './utils/generate-jwt-token';
+import {
+    generateJWT,
+    passportCheckOptions,
+    GoogleAuthSetup,
+    JWTAuthSetup
+} from './utils';
 
 // routes
 import { healthRouter } from "./routes/health";
@@ -38,26 +42,19 @@ app.use(healthRouter);
 app.use(mailRouter);
 
 app.get('/auth/google',
-    passport.authenticate('google', {
-        session: false,
-        accessType: 'offline',
-    })
+    passport.authenticate('google', passportCheckOptions())
 );
 
 app.get('/oauth2/redirect/google',
-    passport.authenticate('google', {
-        session: false,
-        failureRedirect: '/login',
-        failureMessage: true,
-        accessType: 'offline',
-    }),
+    passport.authenticate('google', passportCheckOptions()),
     (req, res) => {
         const token = generateJWT(req.user);
+        // res.send({ jwt: token })
         // res.setHeader('Authorization', 'Bearer ' + token);
-        res.redirect(process.env.CLIENT_ORIGIN + '/auth');
+        res.cookie('jwt', token);
+        res.redirect(process.env.CLIENT_ORIGIN + '/pending');
         // res.send('qwer asd');
     });
-
 
 app.get('*', () => {
     throw new NotFoundError();
