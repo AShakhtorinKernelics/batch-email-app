@@ -1,18 +1,20 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import AfterAuthView from '../views/AfterAuthView.vue'
+import { storageAuthItemName } from '../constants/auth-item-names';
+import { viewNames } from "../constants/view-names";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      name: 'home',
+      name: viewNames.HomeView,
       component: HomeView
     },
     {
       path: '/profile',
-      name: 'profile',
+      name: viewNames.ProfileView,
       component: () => import('../views/ProfileView.vue'),
       meta: { requiresAuth: true }
     },
@@ -22,9 +24,7 @@ const router = createRouter({
       component: AfterAuthView
     },
     {
-      path: '/404',
-      alias: "*",
-      name: 'notFound',
+      path: '/:catchAll(.*)',
       component: () => import('../views/NotFoundView.vue')
     }
   ]
@@ -34,12 +34,12 @@ router.beforeEach((to, from, next) => {
   if (to.matched.some(
     record => record.meta.requiresAuth
   )) {
-    const tokenData = sessionStorage.getItem('jwt');
+    const tokenData = sessionStorage.getItem(storageAuthItemName);
 
     if (tokenData) {
       next();
     } else {
-      next({ name: '/' })
+      next({ name: viewNames.HomeView })
     }
 
   } else {

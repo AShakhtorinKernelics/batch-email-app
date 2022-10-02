@@ -10,29 +10,37 @@
 
 <script lang="ts">
 import { authHeaders } from "../constants/auth-headers";
+import {
+  storageAuthItemName,
+  cookieAuthItemName,
+} from "../constants/auth-item-names";
+import { viewNames } from "../constants/view-names";
 
 export default {
   data() {
-    headerText: authHeaders.pending;
+    return {
+      authHeaders: { ...authHeaders },
+      headerText: authHeaders.pending,
+    };
   },
   mounted() {
     this.transferCookieToStorage();
   },
   methods: {
     transferCookieToStorage() {
-      const jwtData = this.$cookies.get("jwt");
+      const jwtData = this.$cookies.get(cookieAuthItemName);
       this.updateViewOnCookie(!!jwtData);
       if (jwtData) {
-        sessionStorage.setItem("jwt", jwtData);
-        this.$cookies.remove("jwt");
-        this.router$.push({ path: "/profile" });
+        sessionStorage.setItem(storageAuthItemName, jwtData);
+        this.$cookies.remove(cookieAuthItemName);
+        this.$router.push({ name: viewNames.ProfileView });
       }
     },
     updateViewOnCookie(exist: boolean) {
       this.headerText = exist ? authHeaders.succeeded : authHeaders.failed;
     },
     redirectToLogin() {
-      this.router$.push({ path: "/" });
+      this.$router.push({ name: viewNames.HomeView });
     },
   },
 };

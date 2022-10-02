@@ -1,7 +1,7 @@
 
 <template>
   <div class="google-btn-container">
-    <button type="button">Sign in with Google</button>
+    <button type="button" @click="googleAuthReq">Sign in with Google</button>
   </div>
 </template>
 

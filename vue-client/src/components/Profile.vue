@@ -17,6 +17,7 @@
             <button class="btn btn-success" @click="sendEmail">
               Send Email
             </button>
+            <button class="btn btn-success" @click="logOut">Log out</button>
           </div>
         </div>
         <div class="row">
@@ -35,9 +36,13 @@
     </div>
   </div>
 </template>
+
 <script>
 import axios from "axios";
-import List from "./components/List.vue";
+import List from "./List.vue";
+import { storageAuthItemName } from "../constants/auth-item-names";
+import { viewNames } from "../constants/view-names";
+
 export default {
   data() {
     return {
@@ -124,6 +129,10 @@ export default {
         console.log("health");
         console.log(response);
       });
+    },
+    logOut() {
+      sessionStorage.removeItem(storageAuthItemName);
+      this.$router.push({ name: viewNames.HomeView });
     },
   },
 };
